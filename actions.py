@@ -1,13 +1,10 @@
-import json
 import os
 from typing import Any, Text, Dict, List, Union
-# import ast
-from demjson import encode
-import requests
 from dotenv import load_dotenv
 from rasa_sdk import Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.forms import FormAction
+from airtable import Airtable
 
 load_dotenv()
 
@@ -15,83 +12,7 @@ airtable_api_key = os.getenv("AIRTABLE_API_KEY")
 base_id = os.getenv("BASE_ID")
 table_name = os.getenv("TABLE_NAME")
 
-
-from pprint import pprint
-from airtable import Airtable
-
-base_key = 'appzuL8U7K6TMDutQ'  # Insert the Base ID of your working base
-table_name = 'Table_bot'  # Insert the name of the table in your working base
-api_key = 'keyaWserXTjMqcwzl'  # Insert your API Key
-# airtable = Airtable(base_key, table_name, api_key)
 airtable = Airtable(base_id, table_name, airtable_api_key)
-
-
-def create_health_log(confirm_exercise, exercise, sleep, diet, stress, goal):
-    request_url = f"https://api.airtable.com/v0/{base_id}/{table_name}"
-    # request_url = f"https://api.airtable.com/v0/{base_id}/{table_name}?api_key={airtable_api_key}"
-    responses = []
-    headers = {
-        "Authorization": f"Bearer {airtable_api_key}",
-        "Content-Type": "application/json"
-        # f"Authorization: Bearer {airtable_api_key}",
-        # f"Content-Type: application/json"
-        # "Accept": "application/json",
-    }
-    data = {"records": []}
-
-    data_fields = {
-        "fields": {
-            "Exercised?": confirm_exercise,
-            "Type of exercise": exercise,
-            "Amount of sleep": sleep,
-            "Stress": stress,
-            "Diet": diet,
-            "Goal": goal,
-        }
-    }
-
-    data_fields = {
-            "Exercised?": confirm_exercise,
-            "Type of exercise": exercise,
-            "Amount of sleep": sleep,
-            "Stress": stress,
-            "Diet": diet,
-            "Goal": goal,
-    }
-
-    # data = {
-    #     "fields": {
-    #         "Exercised?": confirm_exercise,
-    #         "Type of exercise": exercise,
-    #         "Amount of sleep": sleep,
-    #         "Stress": stress,
-    #         "Diet": diet,
-    #         "Goal": goal,
-    #     }
-    #
-    data["records"].append(data_fields)
-    # data = ast.literal_eval(data)
-    data_json = encode(data)
-    # headers = encode(headers)
-    # data_json = json.dumps(data)
-    print("header " + f'{headers}')
-
-
-    try:
-        response = requests.post(
-            # request_url, headers=headers, data=json.dumps(data)
-            request_url, headers=headers, json=data_json
-        )
-
-        # response.raise_for_status()
-
-    except requests.exceptions.HTTPError as err:
-        raise SystemExit(err)
-    responses.append(response)
-    print("data: " + f'{data_json}')
-    print("response status : " + f'{response.status_code}')
-    print("response : " + f'{response}')
-    return responses
 
 
 class HealthForm(FormAction):
@@ -149,15 +70,6 @@ class HealthForm(FormAction):
         stress = tracker.get_slot("stress")
         diet = tracker.get_slot("diet")
         goal = tracker.get_slot("goal")
-
-        # response = create_health_log(
-        #     confirm_exercise=confirm_exercise,
-        #     exercise=exercise,
-        #     sleep=sleep,
-        #     stress=stress,
-        #     diet=diet,
-        #     goal=goal
-        # )
 
         data_fields = {
             "Exercised?": confirm_exercise,
